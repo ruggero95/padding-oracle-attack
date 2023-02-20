@@ -105,7 +105,8 @@ for i in reversed(range(0,len(blocks))):
                     print(paddingCheck(b, tmpdec))
                     print('-------')
                     print(tmpdec)
-                    plaintext += str(int(padding) ^ fakeValue ^ originalBlock[b])
+                    Dvalue = fakeValue ^ int(padding) #C'8^P'12
+                    plaintext += str(Dvalue ^ originalBlock[b])
                     break
                 #decrypt and padding check
             if(b==6):
@@ -113,4 +114,6 @@ for i in reversed(range(0,len(blocks))):
                 
 print(plaintext)
     
-    
+#TODO
+# change the old values to a value that can have 0x2 as padding-->  P'2[16] ^ I2[16] = 02 ^ trovatoprimaDvalue
+#uguale anche a fakeValue precedente ^ padding ^ padding precedente
