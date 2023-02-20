@@ -68,8 +68,8 @@ def paddingCheck(byteStep, bytes):
     reg = "[A-z0-9]*(?=("+toSearch+"){"+toSearch+"}$)"
     match = re.search(reg, bytearray(bytes).hex())
     if(match is not None):
-        return True
-    return False
+        return toSearch
+    return None
     '''    
     print(bytearray(bytes).hex())
     for s in reversed(range(0,toSearch)):
@@ -87,26 +87,30 @@ blocks = [enc[i:i + BYTES_BLOCK] for i in range(0, len(enc), BYTES_BLOCK)]
 print(blocks)
 #print(b''.join(blocks))
 # for each block
+plaintext = ''
 for i in reversed(range(0,len(blocks))):
     if(i>0):        
         originalBlock = blocks[i-1] #start from the second last
         changingBlock = bytearray(originalBlock)
         print(changingBlock)
-        for b in reversed(range(len(changingBlock))):           
-            for fakeValue in range(0, 255):
+        for b in reversed(range(len(changingBlock))):    #from the end of the byte block       
+            print(b)
+            for fakeValue in range(0, 256):
                 changingBlock[b] = fakeValue
-                blocks[i-1] = changingBlock
-                newBytes = b''.join(blocks)                
                 crackingBlocks = bytes(changingBlock) + blocks[i]
                 tmpdec = decrypt(getCyhper(iv, key), crackingBlocks)
-                if(paddingOracle(tmpdec) and paddingCheck(b, tmpdec)):
+                print(tmpdec)
+                padding = paddingCheck(b, tmpdec)
+                if(paddingOracle(tmpdec) and padding is not None):
                     print(paddingCheck(b, tmpdec))
                     print('-------')
                     print(tmpdec)
-                
+                    plaintext += str(int(padding) ^ fakeValue ^ originalBlock[b])
+                    break
                 #decrypt and padding check
-            break
+            if(b==6):
+                break
                 
-    
+print(plaintext)
     
     
