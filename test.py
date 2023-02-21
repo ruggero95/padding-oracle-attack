@@ -28,9 +28,11 @@ def encrypt(cipher, paddedMsg):
 def decrypt(cipher, ciphertext):
     return cipher.decrypt(ciphertext)
 
-def paddingOracle(data):
+def paddingOracle(data, iv, key):
     try:
-        up = (unpad(data,BYTES_BLOCK))
+        dec = decrypt(getCyhper(iv, key), data)
+        print(dec)
+        up = (unpad(dec,BYTES_BLOCK))
         return True
     except:
         return False
@@ -81,7 +83,7 @@ def paddingCheck(byteStep, bytes):
     return True
     '''
 
-enc = encrypt(getCyhper(iv, key), pad(data, BYTES_BLOCK))
+enc = iv + encrypt(getCyhper(iv, key), pad(data, BYTES_BLOCK))
 print(enc)
 blocks = [enc[i:i + BYTES_BLOCK] for i in range(0, len(enc), BYTES_BLOCK)]
 print(blocks)
@@ -92,26 +94,32 @@ for i in reversed(range(0,len(blocks))):
     if(i>0):        
         originalBlock = blocks[i-1] #start from the second last
         changingBlock = bytearray(originalBlock)
+        DvaluesHolder = bytearray(originalBlock)
         print(changingBlock)
-        for b in reversed(range(len(changingBlock))):    #from the end of the byte block       
+        for b in reversed(range(len(changingBlock))):    #from the end of the byte block      
+            padding = BYTES_BLOCK - b
+            print(padding)
             print(b)
+            if padding!=1:
+                    #prepare other bytes to match the correct padding when is longer than 1
+                    for prep in reversed(range((BYTES_BLOCK-(padding-1)), BYTES_BLOCK)):                        
+                        print('prep'+str(DvaluesHolder[prep])+'^'+str(padding))
+                        #dvalue should exist                                                
+                        changingBlock[prep] = padding ^ DvaluesHolder[prep]
+                        
             for fakeValue in range(0, 256):
                 changingBlock[b] = fakeValue
-                crackingBlocks = bytes(changingBlock) + blocks[i]
-                tmpdec = decrypt(getCyhper(iv, key), crackingBlocks)
-                print(tmpdec)
-                padding = paddingCheck(b, tmpdec)
-                if(paddingOracle(tmpdec) and padding is not None):
-                    print(paddingCheck(b, tmpdec))
+                crackingBlocks = bytes(changingBlock) + blocks[i]                                                                                   
+                if(paddingOracle(crackingBlocks, iv ,key)):
                     print('-------')
-                    print(tmpdec)
-                    Dvalue = fakeValue ^ int(padding) #C'8^P'12
-                    plaintext += str(Dvalue ^ originalBlock[b])
+                    print('operation:'+str(padding)+ "^" + str(fakeValue))
+                    Dvalue = fakeValue ^ padding #C'8^P'12
+                    DvaluesHolder[b] = Dvalue
+                    plaintext += chr(Dvalue ^ originalBlock[b])
                     break
                 #decrypt and padding check
-            if(b==6):
-                break
-                
+            
+print('plain')                
 print(plaintext)
     
 #TODO
