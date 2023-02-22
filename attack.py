@@ -1,5 +1,4 @@
 from paddingOracle import paddingOracle,BLOCK_SIZE_BYTES, interceptChyper
-from Crypto.Random import get_random_bytes
 
 
 def attack(msg: str):
@@ -14,30 +13,30 @@ def attack(msg: str):
             changingBlock = bytearray(originalBlock)
             #copy that holdes the decrypted values calculated by xor with the fakeValues injected
             DvaluesHolder = bytearray(originalBlock)
-            for b in reversed(range(len(changingBlock))):    #from the end of the byte block      
+            #from the end of the byte block
+            for b in reversed(range(len(changingBlock))):          
                 padding = BLOCK_SIZE_BYTES - b
-
+                #if padding is 1 we are at the bottom of the string no need to change previous bytes to padding
                 if padding!=1:
-                        #prepare other bytes to match the correct padding when is longer than 1
-                        for prep in reversed(range((BLOCK_SIZE_BYTES-(padding-1)), BLOCK_SIZE_BYTES)):                        
-                            print('prep'+str(DvaluesHolder[prep])+'^'+str(padding))
-                            #dvalue should exist                                                
-                            changingBlock[prep] = padding ^ DvaluesHolder[prep]
-
+                    #prepare other bytes to match the correct padding when is longer than 1
+                    for prep in reversed(range((BLOCK_SIZE_BYTES-(padding-1)), BLOCK_SIZE_BYTES)):                                                                                                 
+                        changingBlock[prep] = padding ^ DvaluesHolder[prep]
+                #strart injecting fake values to obtain a valid padding
                 for fakeValue in range(0, 256):
                     changingBlock[b] = fakeValue
-                    crackingBlocks = bytes(changingBlock) + blocks[i]                                                                                   
-                    if(paddingOracle(crackingBlocks)):
-                        Dvalue = fakeValue ^ padding #C'8^P'12
+                    #rejoin fackedBlock with previus original blocks
+                    fackedBlocks = bytes(changingBlock) + blocks[i]                                                                                   
+                    if(paddingOracle(fackedBlocks)):
+                        Dvalue = fakeValue ^ padding
+                        #saving decrypted value for later use searching other paddings
                         DvaluesHolder[b] = Dvalue
                         plaintext += chr(Dvalue ^ originalBlock[b])
                         break
-                    #decrypt and padding check
-            
-print('plain')                
-print((plaintext[::-1]))
-    
-#TODO
-# change the old values to a value that can have 0x2 as padding-->  P'2[16] ^ I2[16] = 02 ^ trovatoprimaDvalue
-#uguale anche a fakeValue precedente ^ padding ^ padding precedente
+    return  plaintext[::-1]
+
+if __name__ == "__main__":
+    msg =[b'test msg',b'test on longer message bro']   # 9 bytes
+    for i in range(len(msg)):
+        print(attack(msg[i]))
+
     
