@@ -4,7 +4,7 @@ from Crypto.Random import get_random_bytes
 
 
 BLOCK_SIZE_BIT = 64
-BLOCK_SIZE_BYTES = BLOCK_SIZE_BIT/8
+BLOCK_SIZE_BYTES = int(BLOCK_SIZE_BIT/8)
 KEY = get_random_bytes(BLOCK_SIZE_BYTES)
 IV = get_random_bytes(BLOCK_SIZE_BYTES)
 
@@ -26,4 +26,4 @@ def paddingOracle(data):
         return False
     
 def interceptChyper(msg: str) -> bytes:
-    return  IV + encrypt(getCyhper(IV), pad(msg, BLOCK_SIZE_BYTES))
+    return  IV + encrypt(getCyhper(), pad(msg, BLOCK_SIZE_BYTES))
