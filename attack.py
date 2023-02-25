@@ -1,5 +1,11 @@
+from time import sleep
 from paddingOracle import paddingOracle,BLOCK_SIZE_BYTES, interceptChyper
+import sys
 
+def printAnimation(text):
+    sleep(0.03)
+    sys.stdout.write("\r"+text)
+    sys.stdout.flush()
 
 def attack(msg: str):
     encrypted = interceptChyper(msg)
@@ -31,12 +37,14 @@ def attack(msg: str):
                         #saving decrypted value for later use searching other paddings
                         DvaluesHolder[b] = Dvalue
                         plaintext += chr(Dvalue ^ originalBlock[b])
+                        printAnimation(plaintext[::-1])
                         break
+    print(' ')
     return  plaintext[::-1]
 
 if __name__ == "__main__":
-    msg =[b'test msg',b'test on longer message bro']   # 9 bytes
-    for i in range(len(msg)):
-        print(attack(msg[i]))
+    msg =[b'test msg',b'test on longer message',b'test on longer message, also a lot longer message than previous']   # 9 bytes
+    for i in range(len(msg)):    
+        attack(msg[i])
 
     
