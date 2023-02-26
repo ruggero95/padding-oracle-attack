@@ -1,7 +1,7 @@
 from time import sleep
 from paddingOracle import paddingOracle,BLOCK_SIZE_BYTES, interceptChyper
 import sys
-
+import re
 def printAnimation(text):
     sleep(0.03)
     sys.stdout.write("\r"+text)
@@ -44,6 +44,10 @@ def attack(msg: str):
 
 if __name__ == "__main__":
     msg =[b'test msg',b'test on longer message',b'test on longer message, also a lot longer message than previous']   # 9 bytes
+    argv = ''.join(sys.argv)
+    if(re.search('demo',argv) is None):
+        inp = input('insert the message to attack:\r\n')
+        msg = [bytes(inp, "utf-8")]
     for i in range(len(msg)):    
         attack(msg[i])
 
