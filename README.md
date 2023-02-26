@@ -4,7 +4,7 @@ Implementation of a padding Oracle attack on DES with CBC mode
 ## Usage
 
 ```
-python3 attack.py
+pip3 install -r requirements.txt && python3 attack.py
 ```
 
 ## Example
