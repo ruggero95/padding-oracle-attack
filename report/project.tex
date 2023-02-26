@@ -8,10 +8,9 @@ su algoritmi più complessi come AES con chiave a 128bit purchè usati in modali
 CBC (Cipher Block Chaining) è una modalità di cifratura a blocchi, questo significa che il testo in chiaro viene cifrato passando blocchi di bytes di una 
 lughezza predefinita alla funzione di cifratura. Se però ogni blocco fosse cifrato indipendentemente senza ulteriori manipolazioni uno stesso 
 input genererebbe uno stesso cifrato in output, per questo nella modalità CBC (figura \ref{fig:cbc_enc}), i blocchi non sono cifrati indipendentemente ma 
-l'output della cifratura del blocco precedente viene messo in Xor con il testo in chiaro generando molta più differenza fra gli output.
-Dato l'input di questo tipo di modalità è necessario utilizzare un vettore di inizializzazione (IV) random o fisso al primo blocco da cifrare, in questo progetto viene usato 
+l'output della cifratura del blocco precedente viene messo in Xor con il testo in chiaro da cifrare generando molta più differenza fra gli output.
+visto che è sempre necessario un secondo vettore in input all'inizio è necessario utilizzare un vettore di inizializzazione (IV) random o fisso, in questo progetto viene usato 
 un vettore di inizializzazione random.
-
 \begin{figure}[h!]
     \includegraphics[width=0.7\textwidth]{img/CBC_encr.png}
     \centering
@@ -19,8 +18,8 @@ un vettore di inizializzazione random.
     \label{fig:cbc_enc}
 \end{figure}
 
-per quanto riguarda la decifratura del messaggio (figura \ref{fig:cbc_decr}), sarà sufficiente eseguire l operazione inversa mettendo in Xor il cifrato del blocco precedente con l output della funzione di decifratura, 
-utilizzando lo stesso vettore di inizializzazione (IV).
+Per quanto riguarda la decifratura del messaggio (figura \ref{fig:cbc_decr}), sarà sufficiente eseguire l'operazione inversa mettendo in Xor il cifrato del blocco precedente con l'output della funzione di decifratura, 
+utilizzando all'inizio lo stesso vettore di inizializzazione (IV).
 
 \begin{figure}[h!]
     \includegraphics[width=0.7\textwidth]{img/CBC_decr.png}
@@ -37,7 +36,7 @@ portati in testo cifrato della stessa lunghezza
 \section{Padding}
 La cifratura a blocchi richiede una lunghezza fissa di bytes in ingresso, ma i messaggi da cifrare 
  non sono tutti multipli di quest'ultimap per questo, all'ultimo gruppo di bytes che non rispetta la dimensione viene aggiunto del padding finale.
-Ci son diversi tipi di padding, quello che implementa DES è PKCS\#5 and PKCS\#7, che consiste nell aggiungere n bytes con valore pari al numero di bytes da
+Ci son diversi tipi di padding, quello che implementa DES è PKCS\#5, che consiste nel concatenare n bytes con valore pari al numero di bytes da
  aggiungere per arrivare alla dimensione del blocco. 
 \\Quindi per esempio:
 
@@ -55,7 +54,7 @@ Per esempio nel caso di DES dove la dimensione del blocco è di 64bit (8byte), u
 \begin{verbatim}
     ... | AA AA AA AA AA AA AA AA | AA AA AA AA AA 03 03 03 |
 \end{verbatim}
-Nel caso in cui il massaggio sia invece di un multplo esatto della lunghezza dei blocchi, per evitare di fare controlli aggiuntivi se il padding è da rimuovere o no, viene agiunto ugualmente un blocco intero di padding. In Questo modo in fase di decifratura il padding sarà sempre presente e sempre da rimuovere.
+Nel caso in cui il massaggio sia invece  multplo esatto della lunghezza dei blocchi, per evitare di fare controlli aggiuntivi se il padding è da rimuovere o no, viene agiunto ugualmente un blocco intero di padding. In Questo modo in fase di decifratura il padding sarà sempre presente e sempre da rimuovere.
 \section{Attacco padding Oracle}
 
 L'attacco consiste nello sfruttare informazioni provenienti dalla correttezza del padding di un messaggio manipolato.
@@ -128,6 +127,6 @@ si ha avendo anche p12 a 0x02, possedendo il valore di d12 però possiamo facilm
 \subsection{Blocchi Successivi}
 Visto che la parte decifrata di un blocco dipende solo dal blocco precedente possiamo applicare il procedimento descritto ad ogni blocco rimanente tranne il primo, a meno di aver intercettato anche il vettore di inizializzazione.
 Si ragiona come se il blocco da manipolare sia sempre il penutlimo agganciando il blocco successivo da mandare al padding oracle con il padding che riparte da 0x01 fino a rimepire la lunghezza del blocco.
-\section{Prevenizone}
+\section{Prevenzione}
 Il modo milgiore per proteggersi da un attacco padding oracle è non esporre un errore differente dal server nel caso in cui il padding non sia corretto.
 Un ulteriore misura di precauzione che interviene ancora prima di decifrare i blocchi è introdurre una cifratura autenticata tramite l utilizzo di un hash che verifica l'integrità della cifratura andando a trovare se ci sono state delle manipolazioni. La parte cifrata viene inviata in coda al testo cifrato
