@@ -1,0 +1,49 @@
+\documentclass[a4paper, 12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\usepackage{tabularx}
+\usepackage{todonotes}
+\usepackage{floatpag}
+\usepackage{graphicx}
+\usepackage{pdfpages}
+\usepackage{titling}
+
+\usepackage[a4paper,bindingoffset=0.2in,
+            left=0.8in,right=0.8in,top=1.4in,bottom=1.4in,%
+            footskip=.48in]{geometry}
+
+\pretitle{%
+  \begin{center}
+  \LARGE
+  %\includepdf[pages=-,pagecommand={},width=\textwidth]{img/logo_unimib.pdf}
+  \includegraphics{img/logo_unimib.pdf}
+
+}
+\posttitle{\end{center}}
+
+
+\title{Relazione Sicurezza Informatica \\
+    \large {Attacco Padding Oracle}}
+
+\author{ \small Ruggero Panzeri 874975}
+\date{\small 27, February 2023}
+
+\begin{document}
+
+\newcommand{\imagespace}{\vspace{0.4cm}}
+
+\maketitle
+
+
+\newpage
+
+\tableofcontents
+
+\newpage
+
+\input{project}
+
+\newpage
+\section{Conclusioni}
+        
+\end{document}
