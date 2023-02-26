@@ -1,15 +1,22 @@
 # Padding Oracle Attack
 Implementation of a padding Oracle attack on DES with CBC mode
 
-## Usage
+## Installation
 
 ```
-pip3 install -r requirements.txt && python3 attack.py
+pip3 install -r requirements.txt
 ```
 
-## Example
+## Usage Demo
+
+```
+python3 attack.py --demo
+```
 
 
+## Usage Custom Message
 
-https://user-images.githubusercontent.com/9202746/221382677-9bc0cd34-559d-440e-8a8d-68917a3c8fd9.mov
+```
+python3 attack.py
+```
 
