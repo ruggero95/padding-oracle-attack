@@ -1,6 +1,6 @@
 \section{Introduzione}
-L'obiettivo di questo elaborato è la presentazione di un approfondimento per l'esame di sicurezza informatica che consiste nel'implementare 
-un attacco padding Oracle contro un algoritmo di cifratura a blocchi in modalità CBC.
+L'obiettivo di questo elaborato è la presentazione di un approfondimento per l'esame di sicurezza informatica che consiste nell'implementare 
+un attacco padding oracle contro un algoritmo di cifratura a blocchi in modalità CBC.
 L'algoritmo di cifratura a blocchi scelto è il DES con chiave a 64bit ma potrebbe funzionare anche 
 su algoritmi più complessi come AES con chiave a 128bit purchè usati in modalità CBC.
 \section{CBC Mode}
@@ -19,7 +19,8 @@ un vettore di inizializzazione random.
     \label{fig:cbc_enc}
 \end{figure}
 
-per quanto riguarda la decifratura del messaggio (figura \ref{fig:cbc_decr}), sarà sufficiente eseguire l operazione inversa mettendo in Xor il cifrato del blocco precedente con l output della funzione di decifratura, utilizzando lo stesso vettore di inizializzazione (IV).
+per quanto riguarda la decifratura del messaggio (figura \ref{fig:cbc_decr}), sarà sufficiente eseguire l operazione inversa mettendo in Xor il cifrato del blocco precedente con l output della funzione di decifratura, 
+utilizzando lo stesso vettore di inizializzazione (IV).
 
 \begin{figure}[h!]
     \includegraphics[width=0.7\textwidth]{img/CBC_decr.png}
@@ -34,10 +35,10 @@ la chiave deve essere scambiata su un canale sicuro dalle due parti coinvolte.
 Lavora con blocchi in input di dimensione fissa da 64bit che tramite una serie di operazioni di trasformazione vengono 
 portati in testo cifrato della stessa lunghezza
 \section{Padding}
-La cifratura a blocchi richiede una lunghezza fissa in ingresso ma i messaggi da cifrare 
-. non sono tutti di dimensioni multiple alla dimensione del blocco accettato dall'algoritmo di cifratura. 
-Per questo all'ultimo gruppo di bytes che non rispetta la dimensione viene aggiunto del padding finale.
-Ci son diversi tipi di padding, quello che implementa DES è PKCS\#5 and PKCS\#7, che consiste nell aggiungere n bytes con valore pari al numero di bytes da aggiungere per arrivare alla dimensione del blocco. 
+La cifratura a blocchi richiede una lunghezza fissa di bytes in ingresso, ma i messaggi da cifrare 
+ non sono tutti multipli di quest'ultimap per questo, all'ultimo gruppo di bytes che non rispetta la dimensione viene aggiunto del padding finale.
+Ci son diversi tipi di padding, quello che implementa DES è PKCS\#5 and PKCS\#7, che consiste nell aggiungere n bytes con valore pari al numero di bytes da
+ aggiungere per arrivare alla dimensione del blocco. 
 \\Quindi per esempio:
 
 \begin{verbatim}
@@ -54,15 +55,16 @@ Per esempio nel caso di DES dove la dimensione del blocco è di 64bit (8byte), u
 \begin{verbatim}
     ... | AA AA AA AA AA AA AA AA | AA AA AA AA AA 03 03 03 |
 \end{verbatim}
-Nel caso in cui il massaggio sia invece di un multplo esatto della lunghezza dei blocchi, per evitare di fare controlli aggiuntivi se il padding c'è o no, viene agiunto ugualmente un blocco intero di padding. In Questo modo in fase di decifratura il padding sarà sempre presente e sempre da rimuovere.
+Nel caso in cui il massaggio sia invece di un multplo esatto della lunghezza dei blocchi, per evitare di fare controlli aggiuntivi se il padding è da rimuovere o no, viene agiunto ugualmente un blocco intero di padding. In Questo modo in fase di decifratura il padding sarà sempre presente e sempre da rimuovere.
 \section{Attacco padding Oracle}
 
-L'attacco consiste nello sfruttare informazioni provenienti dalla correttezza del padding di un messaggio creato ad hoc.
+L'attacco consiste nello sfruttare informazioni provenienti dalla correttezza del padding di un messaggio manipolato.
 L'abilità di poter dare informazioni sulla correttezza del padding è data dal padding oracle che è un elmemento 
 fondamentale dell'attacco senza il quale non è possibile procedere.
 In (figura \ref{fig:attack_1}) è rappresenato un esempio di decifratura che aiuterà a spiegare la dinamica dell'attacco.
 Per semplicità di rappresentazione vengono usati blocchi da 4 bytes ma il ragionamento può essere esteso a n bytes di blocchi.
-I blocchi denominati con Dx rappresentano lo stato intermedio dopo la decifratura ma prima di eseguire l operazione di Xor, l' attacco si basa sul trovare proprio questo stato intermedio questo perchè:
+I blocchi denominati con Dx rappresentano lo stato intermedio dopo la decifratura ma prima di eseguire l operazione di Xor, 
+l' attacco si basa sul trovare proprio questo stato intermedio questo perchè:
 
 \begin{verbatim}
    D = C ^ P 
@@ -110,9 +112,13 @@ abbiamo trovato il valore di D, possiamo quindi procedere a trovare il l'effetti
 abbiamo trovato il primo byte di testo in chiaro.
 \subsection{Byte Successivi}
 Il ragionamento che è stato fatto per un byte può essere ripotrato ai byte successivi, cambiando il padding corrispondente al numero di byte che sto manipolando.
-Qundi nella pratica ora ipotizzo che il penultimo byte del testo in chiaro abbia padding 0x02 e cerco per quale valore c'7 iniettato al padding oracle da risposta corretta.
-Nel fare questa operazione però va cambiato anche il valore di c8 perchè deve corrispondere ad un padding corretto, e in questo caso il padding corretto lo 
+Qundi  ora ipotizzo (figura \ref{fig:attack_2}) che il penultimo byte del testo in chiaro abbia padding 0x02 e cerco il valore c'7 che inviato al padding oracle dia validazione corretta.
+Nel fare questa operazione però va cambiato anche il valore di c8 perchè l'intero padding deve essere corretto per non far fallire il padding oracle, e in questo caso il padding corretto lo 
 si ha avendo anche p12 a 0x02, possedendo il valore di d12 però possiamo facilmente ricavare il corretto valore di c8
+\begin{verbatim}
+    C8 = D'12 ^ 0x02
+ \end{verbatim}
+ si continua con lo stesso procedimento fino alla fine del blocco.
 \begin{figure}[h!]
     \includegraphics[width=0.8\textwidth]{img/attack_second_byte.jpeg}
     \centering
@@ -120,4 +126,8 @@ si ha avendo anche p12 a 0x02, possedendo il valore di d12 però possiamo facilm
     \label{fig:attack_3}
 \end{figure}
 \subsection{Blocchi Successivi}
+Visto che la parte decifrata di un blocco dipende solo dal blocco precedente possiamo applicare il procedimento descritto ad ogni blocco rimanente tranne il primo, a meno di aver intercettato anche il vettore di inizializzazione.
+Si ragiona come se il blocco da manipolare sia sempre il penutlimo agganciando il blocco successivo da mandare al padding oracle con il padding che riparte da 0x01 fino a rimepire la lunghezza del blocco.
 \section{Prevenizone}
+Il modo milgiore per proteggersi da un attacco padding oracle è non esporre un errore differente dal server nel caso in cui il padding non sia corretto.
+Un ulteriore misura di precauzione che interviene ancora prima di decifrare i blocchi è introdurre una cifratura autenticata tramite l utilizzo di un hash che verifica l'integrità della cifratura andando a trovare se ci sono state delle manipolazioni. La parte cifrata viene inviata in coda al testo cifrato
